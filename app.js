@@ -4,14 +4,20 @@ const mongoose = require('mongoose');
 const routes = require('./routes/routes');
 const app = express();
 
-// connect mongoose to the mongodb
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost/muber');
+// connect mongoose to the mongodb only if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+    mongoose.connect('mongodb://localhost/muber');
+}
 
 // Middlewares
 app.use(bodyParser.json());
-
-// Router
+// Requests Handler
 routes(app);
+// Middlewares to be executed after the request handler
+app.use((err, req, res, next) => {
+    res.status(422).send({ error: err.message });
+});
+
 
 module.exports = app;
